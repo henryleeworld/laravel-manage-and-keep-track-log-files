@@ -1,4 +1,4 @@
-# Laravel 8 管理和追蹤日誌檔案
+# Laravel 9 管理和追蹤日誌檔案
 
 引入 arcanedev 的 log-viewer 套件來擴增管理和追蹤每個日誌檔案，為了能有效的利用各種來源的日誌資訊，日誌的收集、分析歸類並將其集中儲存是不可或缺的。
 
@@ -23,8 +23,8 @@ $ php artisan key:generate
 ----
 
 ## 畫面截圖
-![](https://i.imgur.com/N14DqNP.png)
+![](https://i.imgur.com/mZMMNCw.png)
 > 全部日誌檔的各級別錯誤數量以圖表方式顯示
 
-![](https://i.imgur.com/XjobbVw.png)
+![](https://i.imgur.com/xx2bYPL.png)
 > 每天日誌檔的各級別錯誤數量以清單方式顯示
