@@ -27,17 +27,20 @@ return [
      | -----------------------------------------------------------------
      |  Supported locales :
      |    'auto', 'ar', 'bg', 'de', 'en', 'es', 'et', 'fa', 'fr', 'hu', 'hy', 'id', 'it', 'ja', 'ko', 'nl',
-     |    'pl', 'pt-BR', 'ro', 'ru', 'sv', 'th', 'tr', 'zh-TW', 'zh'
+     |    'pl', 'pt_BR', 'ro', 'ru', 'sv', 'th', 'tr', 'zh_TW', 'zh'
      */
 
-    'locale'        => 'zh-TW',
+    'locale'        => 'auto',
 
     /* -----------------------------------------------------------------
      |  Theme
      | -----------------------------------------------------------------
      |  Supported themes :
-     |    'bootstrap-3', 'bootstrap-4', 'bootstrap-5'
-     |  Make your own theme by adding a folder to the views directory and specifying it here.
+     |    'bootstrap-5'
+     |    'bootstrap-4'
+     |    'bootstrap-3'
+     |
+     |  You can make your own theme by adding a folder to the views directory and specifying it here.
      */
 
     'theme'         => 'bootstrap-5',
@@ -55,6 +58,8 @@ return [
 
             'middleware' => env('ARCANEDEV_LOGVIEWER_MIDDLEWARE') ? explode(',', env('ARCANEDEV_LOGVIEWER_MIDDLEWARE')) : null,
         ],
+
+        'show' => 'log-viewer::logs.show',
     ],
 
     /* -----------------------------------------------------------------

@@ -14,7 +14,7 @@
                     @foreach($headers as $key => $header)
                     <th scope="col" class="{{ $key == 'date' ? 'text-left' : 'text-center' }}">
                         @if ($key == 'date')
-                            <span class="badge badge-info">{{ $header }}</span>
+                            <span class="badge text-bg-info">{{ $header }}</span>
                         @else
                             <span class="badge badge-level-{{ $key }}">
                                 {{ log_styler()->icon($key) }} {{ $header }}
@@ -22,7 +22,7 @@
                         @endif
                     </th>
                     @endforeach
-                    <th scope="col" class="text-right">@lang('Actions')</th>
+                    <th scope="col" class="text-end">@lang('Actions')</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
                         @foreach($row as $key => $value)
                             <td class="{{ $key == 'date' ? 'text-left' : 'text-center' }}">
                                 @if ($key == 'date')
-                                    <span class="badge bg-primary">{{ $value }}</span>
+                                    <span class="badge text-bg-primary">{{ $value }}</span>
                                 @elseif ($value == 0)
                                     <span class="badge empty">{{ $value }}</span>
                                 @else
@@ -41,22 +41,22 @@
                                 @endif
                             </td>
                         @endforeach
-                        <td class="text-right">
+                        <td class="text-end">
                             <a href="{{ route('log-viewer::logs.show', [$date]) }}" class="btn btn-sm btn-info">
-                                <i class="fa fa-search"></i>
+                                <i class="fa fa-fw fa-search"></i>
                             </a>
                             <a href="{{ route('log-viewer::logs.download', [$date]) }}" class="btn btn-sm btn-success">
-                                <i class="fa fa-download"></i>
+                                <i class="fa fa-fw fa-download"></i>
                             </a>
                             <a href="#delete-log-modal" class="btn btn-sm btn-danger" data-log-date="{{ $date }}">
-                                <i class="fa fa-trash-o"></i>
+                                <i class="fa fa-fw fa-trash-o"></i>
                             </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="11" class="text-center">
-                            <span class="badge badge-secondary">@lang('The list of logs is empty!')</span>
+                            <span class="badge text-bg-secondary">@lang('The list of logs is empty!')</span>
                         </td>
                     </tr>
                 @endforelse
@@ -69,24 +69,22 @@
 
 @section('modals')
     {{-- DELETE MODAL --}}
-    <div id="delete-log-modal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="delete-log-modal" tabindex="-1" aria-labelledby="delete-log-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
             <form id="delete-log-form" action="{{ route('log-viewer::logs.delete') }}" method="POST">
-                <input type="hidden" name="_method" value="DELETE">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                {{ csrf_field() }}
+                {{ method_field('DELETE') }}
                 <input type="hidden" name="date" value="">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">@lang('Delete log file')</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <h1 class="modal-title fs-5" id="delete-log-modal-label">@lang('Delete log file')</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <p></p>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-secondary mr-auto" data-dismiss="modal">@lang('Cancel')</button>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">@lang('Cancel')</button>
                         <button type="submit" class="btn btn-sm btn-danger" data-loading-text="@lang('Loading')&hellip;">@lang('Delete')</button>
                     </div>
                 </div>
@@ -97,56 +95,63 @@
 
 @section('scripts')
     <script>
-        $(function () {
-            var deleteLogModal = $('div#delete-log-modal'),
-                deleteLogForm  = $('form#delete-log-form'),
-                submitBtn      = deleteLogForm.find('button[type=submit]');
+        ready(() => {
+            let deleteLogModal = new bootstrap.Modal('div#delete-log-modal')
+            let deleteLogModalElt = deleteLogModal._element
+            let deleteLogForm = document.querySelector('form#delete-log-form')
+            let submitBtn = new bootstrap.Button(deleteLogForm.querySelector('button[type=submit]'))
 
-            $("a[href='#delete-log-modal']").on('click', function(event) {
-                event.preventDefault();
-                var date    = $(this).data('log-date'),
-                    message = "{{ __('Are you sure you want to delete this log file: :date ?') }}";
+            document.querySelectorAll("a[href='#delete-log-modal']").forEach((elt) => {
+                elt.addEventListener('click', (event) => {
+                    event.preventDefault()
 
-                deleteLogForm.find('input[name=date]').val(date);
-                deleteLogModal.find('.modal-body p').html(message.replace(':date', date));
+                    let date = event.currentTarget.getAttribute('data-log-date')
+                    let message = "{{ __('Are you sure you want to delete this log file: :date ?') }}"
 
-                deleteLogModal.modal('show');
-            });
+                    deleteLogForm.querySelector('input[name=date]').value = date
+                    deleteLogModalElt.querySelector('.modal-body p').innerHTML = message.replace(':date', date)
 
-            deleteLogForm.on('submit', function(event) {
-                event.preventDefault();
-                submitBtn.button('loading');
+                    deleteLogModal.show()
+                })
+            })
 
-                $.ajax({
-                    url:      $(this).attr('action'),
-                    type:     $(this).attr('method'),
-                    dataType: 'json',
-                    data:     $(this).serialize(),
-                    success: function(data) {
-                        submitBtn.button('reset');
-                        if (data.result === 'success') {
-                            deleteLogModal.modal('hide');
-                            location.reload();
+            deleteLogForm.addEventListener('submit', (event) => {
+                event.preventDefault()
+                submitBtn.toggle('loading')
+
+                fetch(event.currentTarget.getAttribute('action'), {
+                    method: 'DELETE',
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        date: event.currentTarget.querySelector("input[name='date']").value,
+                    })
+                })
+                    .then((resp) => resp.json())
+                    .then((resp) => {
+                        if (resp.result === 'success') {
+                            deleteLogModal.hide()
+                            location.reload()
                         }
                         else {
-                            alert('AJAX ERROR ! Check the console !');
-                            console.error(data);
+                            alert('AJAX ERROR ! Check the console !')
+                            console.error(resp)
                         }
-                    },
-                    error: function(xhr, textStatus, errorThrown) {
-                        alert('AJAX ERROR ! Check the console !');
-                        console.error(errorThrown);
-                        submitBtn.button('reset');
-                    }
-                });
+                    })
+                    .catch((err) => {
+                        alert('AJAX ERROR ! Check the console !')
+                        console.error(err)
+                    })
 
-                return false;
-            });
+                return false
+            })
 
-            deleteLogModal.on('hidden.bs.modal', function() {
-                deleteLogForm.find('input[name=date]').val('');
-                deleteLogModal.find('.modal-body p').html('');
-            });
-        });
+            deleteLogModalElt.addEventListener('hidden.bs.modal', () => {
+                deleteLogForm.querySelector('input[name=date]').value = ''
+                deleteLogModalElt.querySelector('.modal-body p').innerHTML = ''
+            })
+        })
     </script>
 @endsection
